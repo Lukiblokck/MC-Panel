@@ -1,0 +1,484 @@
+/* ────────────────────────────────────────────────
+   MC Panel — Minecraft GUI theme
+   Signature: classic Minecraft inventory bevel
+   (raised stone panels / inset slots) + day-night toggle
+   ──────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('/static/assets/minecraft.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── Night (dark / default) ─────────────────── */
+  --bg:        #18181c;
+  --bg2:       #202024;
+  --bg3:       #29292e;
+  --bg-slot:   #1c1c20;
+  --bevel-hi:  #4a4a52;   /* raised-panel highlight edge */
+  --bevel-lo:  #0a0a0c;   /* raised-panel shadow edge   */
+  --slot-hi:   #0a0a0c;   /* inset-slot shadow edge (inverted) */
+  --slot-lo:   #4a4a52;   /* inset-slot highlight edge */
+  --txt:       #e8e8e8;
+  --txt2:      #9a9a9a;
+  --txt3:      #5c5c62;
+  --green:     #4ade80;
+  --green-dim: #1a3d28;
+  --amber:     #fbbf24;
+  --amber-dim: #3d2e0a;
+  --red:       #f87171;
+  --red-dim:   #3d1414;
+  --blue:      #60a5fa;
+  --accent:    #4ade80;
+  --sidebar-w: 220px;
+  --mono:      'Minecraft', 'Consolas', 'Courier New', monospace;
+  --pixel:     'Minecraft', var(--mono);
+}
+
+[data-theme="day"] {
+  /* ── Day (classic Minecraft stone-GUI grey) ──── */
+  --bg:        #c6c6c6;
+  --bg2:       #b0b0b0;
+  --bg3:       #d4d4d4;
+  --bg-slot:   #ababab;
+  --bevel-hi:  #f5f5f5;
+  --bevel-lo:  #5a5a5a;
+  --slot-hi:   #5a5a5a;
+  --slot-lo:   #f5f5f5;
+  --txt:       #2b2b2b;
+  --txt2:      #4d4d4d;
+  --txt3:      #6f6f6f;
+  --green:     #3f8f3f;
+  --green-dim: #cfe8cf;
+  --amber:     #9a6b00;
+  --amber-dim: #f0dfa8;
+  --red:       #a33;
+  --red-dim:   #f0caca;
+  --blue:      #2f6fb0;
+  --accent:    #3f8f3f;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--mono);
+  display: flex;
+  font-size: 13px;
+  image-rendering: pixelated;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* ── Noise overlay ────────────────────────────── */
+.noise {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px;
+  opacity: 0.5;
+}
+[data-theme="day"] .noise { opacity: 0.15; }
+
+/* ── Sidebar ──────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg2);
+  border-right: 4px solid #000;
+  box-shadow: inset -2px 0 0 var(--bevel-lo);
+  display: flex; flex-direction: column;
+  z-index: 10; flex-shrink: 0;
+  height: 100vh;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  font-family: var(--pixel);
+  font-size: 11px; font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--txt);
+  border-bottom: 2px solid #000;
+  line-height: 1.6;
+}
+
+.logo-icon {
+  font-size: 20px;
+  filter: drop-shadow(2px 2px 0 #000);
+}
+
+.nav {
+  display: flex; flex-direction: column;
+  padding: 1rem 0.75rem; gap: 6px;
+  flex: 1;
+}
+
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid #000; background: var(--bg3);
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  color: var(--txt2); font-family: var(--pixel);
+  font-size: 9px; cursor: pointer;
+  transition: all 0.1s; text-align: left;
+}
+
+.nav-btn:hover { color: var(--txt); filter: brightness(1.1); }
+.nav-btn:active,
+.nav-btn.active {
+  color: var(--green);
+  background: var(--green-dim);
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+}
+
+.nav-icon { font-size: 13px; opacity: 0.8; }
+
+.sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 2px solid #000;
+}
+
+.rcon-status { display: flex; align-items: center; gap: 8px; }
+.rcon-dot {
+  width: 8px; height: 8px;
+  background: var(--txt3); transition: background 0.3s;
+  border: 1px solid #000;
+}
+.rcon-dot.online { background: var(--green); animation: pulse 2s infinite; }
+.rcon-dot.offline { background: var(--red); }
+.rcon-label { font-size: 10px; color: var(--txt2); font-family: var(--pixel); letter-spacing: 0.3px; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── Main area ────────────────────────────────── */
+.main {
+  flex: 1; display: flex; flex-direction: column;
+  height: 100vh; overflow: hidden; z-index: 1;
+}
+
+/* ── Topbar ───────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 4px solid #000;
+  box-shadow: 0 2px 0 var(--bevel-lo);
+  background: var(--bg);
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.topbar-right {
+  display: flex; align-items: center; gap: 14px;
+}
+
+.server-info h1 {
+  font-family: var(--pixel); font-size: 13px; font-weight: 400;
+  color: var(--txt); letter-spacing: 0.5px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.35);
+}
+
+.uptime { font-size: 10px; color: var(--txt3); margin-top: 6px; display: block; font-family: var(--pixel); }
+
+.badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg3); border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  font-size: 10px; color: var(--txt2); font-family: var(--pixel);
+}
+
+.badge.online { background: var(--green-dim); color: var(--green); }
+.badge.offline { background: var(--red-dim); color: var(--red); }
+
+.badge-dot {
+  width: 7px; height: 7px; background: currentColor;
+}
+.badge.online .badge-dot { animation: pulse 2s infinite; }
+
+/* ── Day/Night theme switch ──
+   Same .switch/.slider/.off/.on structure and em-based sizing
+   as the classic csozi-style switch, with a black border + bevel
+   added so it matches the rest of the panel, and a different
+   color per mode. */
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 4em;
+  height: 2em;
+  flex-shrink: 0;
+}
+.switch input {
+  opacity: 1;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg3);           /* night: dark stone */
+  border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  transition: background-color .4s;
+}
+.switch input:checked + .slider {
+  background-color: var(--amber);         /* day: golden/sunny */
+}
+.switch input:focus + .slider {
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo), 0 0 0 2px var(--green);
+}
+.off, .on {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2em;
+  width: 2em;
+  background-color: white;
+  border: 2px solid #000;
+  transition: .4s;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.off { opacity: 1; }   /* visible by default: night mode → apagado.jpg */
+.on  { opacity: 0; }   /* visible when checked: day mode → encendido.jpg */
+
+.switch input:checked ~ .off {
+  transform: translateX(2em);
+  opacity: 0;
+}
+.switch input:checked ~ .on {
+  transform: translateX(2em);
+  opacity: 1;
+}
+
+/* ── Sections ─────────────────────────────────── */
+.section {
+  display: none; flex-direction: column;
+  padding: 1.25rem 1.5rem; gap: 12px;
+  overflow-y: auto; flex: 1;
+}
+.section.active { display: flex; }
+
+/* ── Stats row ────────────────────────────────── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+
+.stat-card {
+  background: var(--bg2); border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  padding: 1rem;
+}
+.stat-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--txt3); margin-bottom: 8px; font-family: var(--pixel);
+}
+.stat-value {
+  font-size: 22px; font-weight: 600; color: var(--txt);
+  font-family: var(--mono); line-height: 1;
+}
+.stat-bar {
+  height: 6px; background: var(--bg-slot);
+  border: 1px solid #000;
+  box-shadow: inset 1px 1px 0 var(--slot-hi), inset -1px -1px 0 var(--slot-lo);
+  margin: 10px 0 4px; overflow: hidden;
+}
+.stat-fill {
+  height: 100%; transition: width 0.5s ease;
+}
+.stat-fill.green { background: var(--green); }
+.stat-fill.amber { background: var(--amber); }
+.stat-fill.red   { background: var(--red); }
+.stat-sub { font-size: 9px; color: var(--txt3); font-family: var(--pixel); }
+
+/* ── Cards ────────────────────────────────────── */
+.card {
+  background: var(--bg2); border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  padding: 1rem 1.25rem;
+}
+
+.card.full-height {
+  flex: 1; display: flex; flex-direction: column;
+  min-height: 0;
+}
+
+.card-title {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--txt3); margin-bottom: 1rem; font-family: var(--pixel);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Secondary title inside a card (e.g. "GLOBAL GAMEMODE"):
+   needs extra spacing from whatever comes right before it */
+.card-title.sub-title {
+  margin-top: 1.25rem;
+}
+
+/* Stacks an input + button (or other fields) with spacing between them.
+   Used in Broadcast and in the custom world command. */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Minecraft-style buttons ───────────────────── */
+.quick-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+
+button, .qbtn, .btn-primary, .btn-sm, .player-act {
+  font-family: var(--pixel);
+  background-color: var(--bg3);
+  color: var(--txt2);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 var(--bevel-hi),
+    inset -2px -2px 0 var(--bevel-lo),
+    0 3px 0 0 rgba(0,0,0,0.35);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  transition: transform 0.05s ease, filter 0.1s ease;
+}
+
+button:hover, .qbtn:hover, .btn-primary:hover, .btn-sm:hover, .player-act:hover {
+  filter: brightness(1.15);
+  color: var(--txt);
+}
+
+button:active, .qbtn:active, .btn-primary:active, .btn-sm:active, .player-act:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 2px 2px 0 var(--bevel-hi),
+    inset -2px -2px 0 var(--bevel-lo);
+}
+
+.qbtn {
+  padding: 10px 10px;
+  font-size: 10px;
+  text-align: center;
+}
+.qbtn.green { background: var(--green-dim); color: var(--green); }
+.qbtn.red   { background: var(--red-dim);   color: var(--red); }
+
+.btn-primary {
+  padding: 10px 16px;
+  font-size: 10px;
+  background: var(--green-dim); color: var(--green);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 9px;
+  color: var(--txt3);
+  box-shadow:
+    inset 2px 2px 0 var(--bevel-hi),
+    inset -2px -2px 0 var(--bevel-lo),
+    0 2px 0 0 rgba(0,0,0,0.35);
+}
+
+.player-act {
+  padding: 5px 10px;
+  font-size: 9px;
+  color: var(--txt3);
+}
+.player-act:hover { background: var(--red-dim); color: var(--red); }
+
+/* ── Console / Log ────────────────────────────── */
+.log-box {
+  flex: 1; overflow-y: auto; min-height: 0;
+  background: var(--bg-slot); border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+  padding: 10px 12px;
+  font-size: 12px; line-height: 1.7;
+  display: flex; flex-direction: column; gap: 1px;
+  margin-bottom: 10px;
+}
+
+.log-line { display: block; white-space: pre-wrap; word-break: break-all; }
+.log-line.gray  { color: var(--txt3); }
+.log-line.info  { color: var(--blue); }
+.log-line.ok    { color: var(--green); }
+.log-line.warn  { color: var(--amber); }
+.log-line.error { color: var(--red); }
+.log-line.cmd   { color: var(--txt); }
+
+.cmd-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.cmd-prefix { color: var(--green); font-size: 14px; font-weight: 600; font-family: var(--pixel); }
+.cmd-input {
+  flex: 1; padding: 10px;
+  border: 2px solid #000; background: var(--bg-slot);
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+  color: var(--txt); font-family: var(--mono); font-size: 13px;
+}
+.cmd-input:focus { outline: none; }
+
+.inp {
+  width: 100%; padding: 10px;
+  border: 2px solid #000; background: var(--bg-slot);
+  box-shadow: inset 2px 2px 0 var(--slot-hi), inset -2px -2px 0 var(--slot-lo);
+  color: var(--txt); font-family: var(--mono); font-size: 13px;
+}
+.inp:focus { outline: none; }
+
+/* ── Player table ─────────────────────────────── */
+.player-table { display: flex; flex-direction: column; gap: 8px; }
+
+.player-row {
+  display: grid; grid-template-columns: 1fr auto auto auto auto;
+  align-items: center; gap: 12px;
+  padding: 10px; border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  background: var(--bg3);
+  font-size: 12px;
+}
+.player-name { font-weight: 500; color: var(--txt); }
+.player-ping { color: var(--txt3); }
+.player-tag {
+  padding: 3px 6px; font-size: 9px; font-weight: 600;
+  background: var(--amber-dim); color: var(--amber); border: none;
+  font-family: var(--pixel);
+}
+
+.empty-state { color: var(--txt3); text-align: center; padding: 2rem; font-family: var(--pixel); font-size: 10px; }
+
+/* ── Misc ─────────────────────────────────────── */
+.log-entry {
+  font-size: 12px; padding: 8px 10px;
+  background: var(--bg3); border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+  color: var(--txt2);
+}
+.log-entry.ok    { color: var(--green); background: var(--green-dim); }
+.log-entry.error { color: var(--red);   background: var(--red-dim); }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-slot); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border: 1px solid #000; }
+::-webkit-scrollbar-thumb:hover { background: var(--txt3); }
+
+/* Basic responsive */
+@media (max-width: 900px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .sidebar { width: 180px; }
+}

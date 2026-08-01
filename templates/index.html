@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MC Panel</title>
+
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+
+<body>
+
+  <div class="noise"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <span>MC PANEL</span>
+    </div>
+
+    <nav class="nav">
+
+      <button class="nav-btn active" data-section="overview">
+        <span class="nav-icon">◆</span>
+        <span>Overview</span>
+      </button>
+
+      <button class="nav-btn" data-section="console">
+        <span class="nav-icon">▶</span>
+        <span>Console</span>
+      </button>
+
+      <button class="nav-btn" data-section="players">
+        <span class="nav-icon">◆</span>
+        <span>Players</span>
+      </button>
+
+      <button class="nav-btn" data-section="world">
+        <span class="nav-icon">■</span>
+        <span>World</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="rcon-status">
+        <span class="rcon-dot" id="rconDot"></span>
+        <span class="rcon-label" id="rconLabel">
+          CONNECTING...
+        </span>
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <div class="server-info">
+
+        <h1 id="serverName">
+          MINECRAFT SERVER
+        </h1>
+
+        <span class="uptime" id="uptimeLabel">
+          —
+        </span>
+
+      </div>
+
+
+      <div class="topbar-right">
+
+        <span class="badge" id="statusBadge">
+
+          <span class="badge-dot" id="statusDot"></span>
+
+          <span id="statusText">
+            —
+          </span>
+
+        </span>
+
+
+        <!-- DAY / NIGHT SWITCH -->
+        <label class="switch" title="Switch theme">
+
+          <input
+            type="checkbox"
+            id="themeToggle"
+          >
+
+          <span class="slider"></span>
+
+          <!-- NIGHT MODE (default) -->
+          <img src="/static/img/apagado.jpg" class="off" alt="Night mode">
+
+          <!-- DAY MODE (when checked) -->
+          <img src="/static/img/encendido.jpg" class="on" alt="Day mode">
+        </label>
+
+      </div>
+
+    </header>
+
+
+    <!-- OVERVIEW -->
+    <section class="section active" id="sec-overview">
+
+
+      <!-- STATS -->
+      <div class="stats-row">
+
+        <div class="stat-card">
+
+          <div class="stat-label">
+            PLAYERS
+          </div>
+
+          <div class="stat-value" id="statPlayers">
+            —
+          </div>
+
+          <div class="stat-bar">
+            <div
+              class="stat-fill green"
+              id="barPlayers"
+              style="width:0%"
+            ></div>
+          </div>
+
+          <div class="stat-sub">
+            MAX 20
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <div class="stat-label">
+            TPS
+          </div>
+
+          <div class="stat-value" id="statTps">
+            —
+          </div>
+
+          <div class="stat-bar">
+            <div
+              class="stat-fill green"
+              id="barTps"
+              style="width:0%"
+            ></div>
+          </div>
+
+          <div class="stat-sub">
+            TARGET 20
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <div class="stat-label">
+            CPU
+          </div>
+
+          <div class="stat-value" id="statCpu">
+            —
+          </div>
+
+          <div class="stat-bar">
+            <div
+              class="stat-fill amber"
+              id="barCpu"
+              style="width:0%"
+            ></div>
+          </div>
+
+          <div
+            class="stat-sub"
+            id="subCpu"
+          >
+            SYSTEM
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <div class="stat-label">
+            RAM
+          </div>
+
+          <div class="stat-value" id="statRam">
+            —
+          </div>
+
+          <div class="stat-bar">
+            <div
+              class="stat-fill amber"
+              id="barRam"
+              style="width:0%"
+            ></div>
+          </div>
+
+          <div
+            class="stat-sub"
+            id="subRam"
+          >
+            SYSTEM
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS + BROADCAST -->
+      <div class="grid-2">
+
+
+        <div class="card">
+
+          <div class="card-title">
+            QUICK ACTIONS
+          </div>
+
+          <div class="quick-grid">
+
+            <button
+              class="qbtn green"
+              onclick="quickAction('save')"
+            >
+              SAVE
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="quickAction('time-day')"
+            >
+              DAY
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="quickAction('time-night')"
+            >
+              NIGHT
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="quickAction('weather-clear')"
+            >
+              CLEAR
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="quickAction('weather-rain')"
+            >
+              RAIN
+            </button>
+
+            <button
+              class="qbtn red"
+              onclick="quickAction('kickall')"
+            >
+              KICK ALL
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-title">
+            BROADCAST
+          </div>
+
+          <div class="form-stack">
+
+            <input
+              class="inp"
+              id="sayInput"
+              placeholder="MESSAGE TO SERVER..."
+              maxlength="200"
+            >
+
+            <button
+              class="btn-primary"
+              onclick="sendSay()"
+            >
+              SEND TO ALL
+            </button>
+
+          </div>
+
+
+          <div
+            class="card-title sub-title"
+          >
+            GLOBAL GAMEMODE
+          </div>
+
+
+          <div class="quick-grid">
+
+            <button
+              class="qbtn"
+              onclick="setGamemode('survival')"
+            >
+              SURVIVAL
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setGamemode('creative')"
+            >
+              CREATIVE
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setGamemode('adventure')"
+            >
+              ADVENTURE
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setGamemode('spectator')"
+            >
+              SPECTATOR
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CONSOLE -->
+    <section
+      class="section"
+      id="sec-console"
+    >
+
+      <div class="card full-height">
+
+        <div class="card-title">
+
+          <span>
+            RCON CONSOLE
+          </span>
+
+          <button
+            class="btn-sm"
+            onclick="clearLog()"
+          >
+            CLEAR
+          </button>
+
+        </div>
+
+
+        <div
+          class="log-box"
+          id="logBox"
+        >
+
+          <span class="log-line gray">
+            [PANEL] WAITING FOR RCON CONNECTION...
+          </span>
+
+        </div>
+
+
+        <div class="cmd-row">
+
+          <span class="cmd-prefix">
+            &gt;
+          </span>
+
+          <input
+            class="cmd-input"
+            id="cmdInput"
+            placeholder="TYPE A COMMAND..."
+            autocomplete="off"
+            onkeydown="if(event.key==='Enter')sendCommand()"
+          >
+
+          <button
+            class="btn-primary"
+            onclick="sendCommand()"
+          >
+            RUN
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PLAYERS -->
+    <section
+      class="section"
+      id="sec-players"
+    >
+
+      <div class="card">
+
+        <div class="card-title">
+
+          PLAYERS ONLINE
+
+          <span>
+            (<span id="playersCount">0</span>)
+          </span>
+
+        </div>
+
+
+        <div
+          class="player-table"
+          id="playerTable"
+        >
+
+          <div class="empty-state">
+            NO PLAYERS ONLINE
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="card-title">
+          WHITELIST
+        </div>
+
+
+        <div class="cmd-row">
+
+          <input
+            class="inp"
+            id="wlInput"
+            placeholder="PLAYER NAME"
+          >
+
+          <button
+            class="btn-primary"
+            onclick="wlAdd()"
+          >
+            ADD
+          </button>
+
+          <button
+            class="qbtn red"
+            onclick="wlRemove()"
+          >
+            REMOVE
+          </button>
+
+        </div>
+
+
+        <div
+          class="log-entry"
+          id="wlResult"
+          style="margin-top:8px;display:none"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- WORLD -->
+    <section
+      class="section"
+      id="sec-world"
+    >
+
+      <div class="grid-2">
+
+
+        <div class="card">
+
+          <div class="card-title">
+            WORLD TIME
+          </div>
+
+          <div class="quick-grid">
+
+            <button
+              class="qbtn green"
+              onclick="setTime('day')"
+            >
+              SUNRISE
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setTime('noon')"
+            >
+              NOON
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setTime('night')"
+            >
+              NIGHT
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setTime('midnight')"
+            >
+              MIDNIGHT
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-title">
+            WEATHER
+          </div>
+
+          <div class="quick-grid">
+
+            <button
+              class="qbtn green"
+              onclick="setWeather('clear')"
+            >
+              CLEAR
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setWeather('rain')"
+            >
+              RAIN
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="setWeather('thunder')"
+            >
+              THUNDER
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-title">
+            GAMERULES
+          </div>
+
+          <div class="quick-grid">
+
+            <button
+              class="qbtn"
+              onclick="rconCmd('gamerule doDaylightCycle true')"
+            >
+              DAYLIGHT CYCLE ON
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="rconCmd('gamerule doDaylightCycle false')"
+            >
+              DAYLIGHT CYCLE OFF
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="rconCmd('gamerule doWeatherCycle false')"
+            >
+              FIXED WEATHER
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="rconCmd('gamerule keepInventory true')"
+            >
+              KEEP INV ON
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="rconCmd('gamerule mobGriefing false')"
+            >
+              MOB GRIEF OFF
+            </button>
+
+            <button
+              class="qbtn"
+              onclick="rconCmd('gamerule doMobSpawning true')"
+            >
+              SPAWNS ON
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="card-title">
+            CUSTOM COMMAND
+          </div>
+
+          <div class="form-stack">
+
+            <input
+              class="inp"
+              id="worldCmdInput"
+              placeholder="/gamemode survival @a"
+            >
+
+            <button
+              class="btn-primary"
+              onclick="sendWorldCmd()"
+            >
+              RUN
+            </button>
+
+          </div>
+
+
+          <div
+            class="log-entry"
+            id="worldCmdResult"
+            style="margin-top:8px;display:none"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script src="/static/js/panel.js"></script>
+
+</body>
+</html>
