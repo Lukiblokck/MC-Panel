@@ -32,29 +32,46 @@ log = logging.getLogger("mcpanel")
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
+# SECURITY: no real-looking default secrets in source. If the env var isn't
+# set, we generate a random throwaway value at startup instead of shipping
+# a fixed secret in the code (which is unsafe the moment this file is
+# committed to git, shared, or reused across deployments).
 
-DEFAULT_SECRET_KEY = "change-this-in-production"
-DEFAULT_RCON_PASSWORD = "your_rcon_password"
+def _get_required_or_random(env_name: str, purpose: str) -> str:
+    value = os.environ.get(env_name)
+    if value:
+        return value
+    random_value = os.urandom(24).hex()
+    log.warning(
+        "%s is not set. Generated a random %s for this run only "
+        "(it will change on every restart). Set %s in your environment "
+        "or .env file for a stable value.",
+        env_name, purpose, env_name,
+    )
+    return random_value
+
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", DEFAULT_SECRET_KEY)
+app.config["SECRET_KEY"] = _get_required_or_random("SECRET_KEY", "Flask secret key")
 
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "*")
 socketio = SocketIO(app, cors_allowed_origins=CORS_ORIGINS, async_mode="threading")
 
 RCON_HOST = os.environ.get("RCON_HOST", "127.0.0.1")
 RCON_PORT = int(os.environ.get("RCON_PORT", 25575))
-RCON_PASSWORD = os.environ.get("RCON_PASSWORD", DEFAULT_RCON_PASSWORD)
+RCON_PASSWORD = os.environ.get("RCON_PASSWORD")  # must be set explicitly, no fallback
 RCON_TIMEOUT = int(os.environ.get("RCON_TIMEOUT", 5))  # seconds
 STATS_INTERVAL = int(os.environ.get("STATS_INTERVAL", 3))  # seconds
 
 # Commands that must never be run from the panel (require direct server access)
 BLOCKED_COMMANDS = ("stop", "restart")
 
-if app.config["SECRET_KEY"] == DEFAULT_SECRET_KEY:
-    log.warning("SECRET_KEY is using the default value. Set a random SECRET_KEY before deploying to production.")
-if RCON_PASSWORD == DEFAULT_RCON_PASSWORD:
-    log.warning("RCON_PASSWORD is using the default value. Set RCON_PASSWORD to match your server.properties.")
+if not RCON_PASSWORD:
+    log.error(
+        "RCON_PASSWORD is not set. Set it in your environment (matching "
+        "server.properties) before starting the panel. Exiting."
+    )
+    raise SystemExit(1)
 
 rcon_lock = threading.Lock()
 server_online = False
@@ -403,9 +420,11 @@ def on_disconnect():
 
 @socketio.on("command")
 def on_ws_command(data):
+    """Handles a command sent over the WebSocket connection."""
     cmd = (data.get("command") or "").strip()
     if not cmd:
         return
+
     if is_command_blocked(cmd):
         emit("log", {
             "time": datetime.now().strftime("%H:%M:%S"),
@@ -415,8 +434,25 @@ def on_ws_command(data):
         })
         return
 
-    socketio.start_background_task(broadcast_stats)
+    # BUG FIX: the command was validated but never actually executed.
+    ok, resp = rcon_command(cmd)
+    socketio.emit("log", {
+        "time": datetime.now().strftime("%H:%M:%S"),
+        "cmd": cmd,
+        "response": resp,
+        "ok": ok,
+    })
 
+
+# ---------------------------------------------------------------------------
+# Entrypoint
+# ---------------------------------------------------------------------------
+# BUG FIX: this block used to be nested inside on_ws_command(), so the app
+# never actually started listening — it just reached end-of-file and exited
+# with status 0 the moment the module finished loading.
+
+if __name__ == "__main__":
+    socketio.start_background_task(broadcast_stats)
     socketio.run(
         app,
         host="0.0.0.0",
