@@ -414,22 +414,6 @@ def on_ws_command(data):
             "ok": False,
         })
         return
-    ok, resp = rcon_command(cmd)
-    log_entry = {
-        "time": datetime.now().strftime("%H:%M:%S"),
-        "cmd": cmd,
-        "response": resp,
-        "ok": ok,
-    }
-    emit("log", log_entry)
-
-
-# ---------------------------------------------------------------------------
-# Startup
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    log.info("Connecting to RCON at %s:%s", RCON_HOST, RCON_PORT)
 
     socketio.start_background_task(broadcast_stats)
 
