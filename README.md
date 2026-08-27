@@ -22,8 +22,6 @@
 
 <br />
 
-<br />
-
 MC Panel is a compact control center for server administrators who want full RCON access, real-time monitoring, and player management without touching the console. It connects directly to your Minecraft server, exposes a clean REST API, and streams live stats straight to your browser.
 
 ## Requirements
