@@ -10,7 +10,7 @@
 <img src="https://img.shields.io/badge/Flask-Backend-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
 <img src="https://img.shields.io/badge/Socket.IO-Realtime-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.IO" />
 <img src="https://img.shields.io/badge/RCON-Enabled-3B7A57?style=for-the-badge" alt="RCON" />
-<img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License" />
+<img src="https://img.shields.io/badge/License-Apache%202.0-D22128?style=for-the-badge&logo=apache&logoColor=white" alt="License" />
 
 <br />
 
